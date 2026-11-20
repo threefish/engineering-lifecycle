@@ -1,0 +1,19 @@
+# 构建产物
+target/
+
+# SQLite 数据文件（运行期生成，不入库）
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# 日志
+*.log

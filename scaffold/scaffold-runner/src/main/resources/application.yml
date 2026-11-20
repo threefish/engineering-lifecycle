@@ -1,0 +1,57 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: scaffold
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:./data/scaffold.db
+    hikari:
+      # SQLite 单写者：小池即可；>=2 支撑异步日志的 REQUIRES_NEW 独立连接
+      maximum-pool-size: 5
+      minimum-idle: 1
+      # WAL 提升读写并发；busy_timeout 遇锁等待而非立即报错
+      connection-init-sql: "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL; PRAGMA busy_timeout=5000;"
+  sql:
+    init:
+      # SQLite 非 embedded 数据库，建表/种子脚本须显式 always；schema.sql 先于 data.sql 执行
+      mode: always
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: non_null
+
+mybatis-plus:
+  # LocalDateTime ↔ epoch 毫秒（与 data.sql 种子一致；SQLite 列亲和为数值）
+  type-handlers-package: com.example.scaffold.infrastructure.repository.handler
+  global-config:
+    db-config:
+      # 更新为整行覆盖语义：请求中显式置空的字段也落 NULL（默认 NOT_NULL 会跳过 null 字段）
+      update-strategy: always
+  configuration:
+    map-underscore-to-camel-case: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+# 防腐层演示客户端配置（占位）
+app:
+  acl:
+    demo:
+      base-url: http://localhost:9999
+      connect-timeout-millis: 2000
+      read-timeout-millis: 3000
+      max-attempts: 3
+      backoff-base-millis: 200
+      backoff-max-millis: 2000
+
+logging:
+  level:
+    root: info
+    com.example.scaffold: debug
+    # Mapper 接口 DEBUG 输出执行的 SQL 与参数
+    com.example.scaffold.infrastructure.repository.mapper: debug
